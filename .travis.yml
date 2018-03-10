@@ -11,7 +11,7 @@ node_js:
   - "8"
   
 before_install:
-  - npm install npm@5 -g
+  - npm install npm@5.7.1 -g
   - npm cache verify
   - npm prune
   - npm update
