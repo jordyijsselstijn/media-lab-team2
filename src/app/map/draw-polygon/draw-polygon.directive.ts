@@ -45,3 +45,20 @@ export class DrawPolygonDirective implements OnInit, AfterViewInit {
 
   }
 }
+
+/* 
+[
+  [-74.01121234037177, 40.71458856797463]
+  [-74.00710049383024, 40.71462306961982]
+  [-74.0071763581577, 40.71229991905943]
+  [-74.01159166200478, 40.71186288167783]
+  [-74.01121234037177, 40.71458856797463]
+]
+
+https://gis.stackexchange.com/questions/163044/mapbox-how-to-generate-a-random-coordinate-inside-a-polygon
+
+*/
+
+
+
+
