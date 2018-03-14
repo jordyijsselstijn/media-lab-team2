@@ -60,12 +60,13 @@ export class DrawPolygonDirective implements OnInit, AfterViewInit {
         });
       let map = this.parent.mapInstance;
       map.getSource('points')
-        .setData(points.features);
+        .setData(points);
     }
   }
 
-  generatePointGrid(e) {
 
+  generatePointGrid(e) {
+    console.log('generate called');
     var data = this.drawControl.getAll();
     if (data.features.length > 0) {
       let points = turf.pointGrid(
@@ -80,10 +81,7 @@ export class DrawPolygonDirective implements OnInit, AfterViewInit {
       map.addSource('points',
         {
           "type": "geojson",
-          "data": {
-            "type": "FeatureCollection",
-            "features": points.features
-          }
+          "data": points
         })
       map.addLayer({
         "id": "points",
