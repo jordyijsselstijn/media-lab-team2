@@ -1,5 +1,10 @@
 import { Directive, OnInit, AfterViewInit, ViewContainerRef } from '@angular/core';
 import * as MapboxDraw from '@mapbox/mapbox-gl-draw';
+import * as mapboxGl from 'mapbox-gl';
+import * as turf from "@turf/turf";
+import { Units } from '@turf/helpers';
+import { GeoJSONGeometry } from 'mapbox-gl';
+import { DrawPolygonService } from './draw-polygon.service';
 
 @Directive({
   selector: '[DrawPolygon]'
@@ -31,33 +36,75 @@ export class DrawPolygonDirective implements OnInit, AfterViewInit {
   setupDrawControls() {
     let mapInstance = this.parent.mapInstance;
     mapInstance.addControl(this.drawControl);
-    mapInstance.on('draw.create', this.getData.bind(this));
-    mapInstance.on('draw.delete', this.getData.bind(this));
-    mapInstance.on('draw.update', this.getData.bind(this));
+    mapInstance.on('draw.create', this.generatePointGrid.bind(this));
+    mapInstance.on('draw.delete', this.removePointGrid.bind(this));
+    mapInstance.on('draw.update', this.updatePointGrid.bind(this));
   }
 
-  getData(e) {
+  removePointGrid() {
+    let map = this.parent.mapInstance;
+    map.removeLayer('points');
+    map.removeSource('points');
+  }
+
+  updatePointGrid() {
     var data = this.drawControl.getAll();
-    console.log(data);
+    if (data.features.length > 0) {
+      let points = turf.pointGrid(
+        turf.bbox(
+          data.features[0]),
+        30,
+        {
+          units: 'meters',
+          mask: data.features[0]
+        });
+      let map = this.parent.mapInstance;
+      map.getSource('points')
+        .setData(points.features);
+    }
+  }
+
+  generatePointGrid(e) {
+
+    var data = this.drawControl.getAll();
+    if (data.features.length > 0) {
+      let points = turf.pointGrid(
+        turf.bbox(
+          data.features[0]),
+        30,
+        {
+          units: 'meters',
+          mask: data.features[0]
+        });
+      let map = this.parent.mapInstance;
+      map.addSource('points',
+        {
+          "type": "geojson",
+          "data": {
+            "type": "FeatureCollection",
+            "features": points.features
+          }
+        })
+      map.addLayer({
+        "id": "points",
+        "type": "symbol",
+        "source": "points",
+        "layout": {
+          "icon-image": "custom-marker",
+          "text-field": "{title}",
+          "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+          "text-offset": [0, 0.6],
+          "text-anchor": "top"
+        }
+      });
+
+    }
   }
 
   ngAfterViewInit() {
 
   }
 }
-
-/* 
-[
-  [-74.01121234037177, 40.71458856797463]
-  [-74.00710049383024, 40.71462306961982]
-  [-74.0071763581577, 40.71229991905943]
-  [-74.01159166200478, 40.71186288167783]
-  [-74.01121234037177, 40.71458856797463]
-]
-
-https://gis.stackexchange.com/questions/163044/mapbox-how-to-generate-a-random-coordinate-inside-a-polygon
-
-*/
 
 
 
