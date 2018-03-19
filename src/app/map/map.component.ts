@@ -13,6 +13,7 @@ export class MapComponent {
   labelLayerId: string;
 
   constructor() {
+    
   }
 
   onMapClicked(event) {
@@ -21,6 +22,7 @@ export class MapComponent {
 
   onLoad(mapInstance) {
     this.map = mapInstance!;
+    this.map.setCenter([4.490335, 51.914845]);
     const layers = this.map.getStyle().layers!;
 
     for (let i = 0; i < layers.length; i++) {
