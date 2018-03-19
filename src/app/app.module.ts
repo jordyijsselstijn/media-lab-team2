@@ -4,6 +4,7 @@ import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { APP_CONFIG } from './app.config';
 import { MapsModule } from './map/map.module';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -11,6 +12,7 @@ import { MapsModule } from './map/map.module';
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     MapsModule
   ],
   providers: [
