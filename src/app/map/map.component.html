@@ -1,3 +1,3 @@
-<mgl-map DrawPolygon [style]="'mapbox://styles/jordyijsselstijn/cjeo02x9pf9e52rp2jsef16hp'" [zoom]="15.5" [center]="[-74.0066, 40.7135]"
-  (load)=" onLoad($event) ">
+<mgl-map [DrawPolygon]="{ markerSpread: 140, markerSpreadUnit: 'meters'}" [style]="'mapbox://styles/jordyijsselstijn/cjeo02x9pf9e52rp2jsef16hp'"
+  [zoom]="15.5" [center]="[-74.0066, 40.7135]" (load)=" onLoad($event) ">
 </mgl-map>

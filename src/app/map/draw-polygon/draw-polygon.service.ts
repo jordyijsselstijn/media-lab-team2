@@ -1,11 +1,14 @@
 import * as _ from 'lodash';
-import { GeoJSONGeometry } from 'mapbox-gl';
-import { PolygonBounds } from './PolygonBounds';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
+import { Map } from 'mapbox-gl';
 
+@Injectable()
 export class DrawPolygonService {
-    constructor() { }
+    constructor(private http: HttpClient) { }
 
-    static getBoundsOfPolygon(polygon: any): PolygonBounds {
-        return new PolygonBounds(polygon);
+    filterFeatures(map: Map) {
+
     }
 }
