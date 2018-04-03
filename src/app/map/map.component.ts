@@ -29,5 +29,18 @@ export class MapComponent {
         break;
       }
     }
+    this.loadMarkerImage("https://i.imgur.com/MK4NUzI.png")
+      .then((image) => {
+        this.map.addImage("custom-marker", image);
+      });
+  }
+
+  loadMarkerImage(imageUrl): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.map.loadImage("https://i.imgur.com/MK4NUzI.png", function (err, image) {
+        if (err) reject(err);
+        resolve(image);
+      })
+    })
   }
 }
