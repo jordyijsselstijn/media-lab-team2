@@ -1,29 +1,31 @@
-import { Directive, OnInit, AfterViewInit, ViewContainerRef, Input } from '@angular/core';
+import { Directive, OnInit, AfterViewInit, ViewContainerRef, Input, ViewChild, ElementRef } from '@angular/core';
+import { MapService } from 'ngx-mapbox-gl';
 import * as MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as mapboxGl from 'mapbox-gl';
 import * as turf from "@turf/turf";
-import { Units } from '@turf/helpers';
-import { GeoJSONGeometry } from 'mapbox-gl';
+import { Units, BBox, FeatureCollection, Point } from '@turf/helpers';
+import { GeoJSONGeometry, Map, GeoJSONSource, IControl } from 'mapbox-gl';
 import { DrawPolygonConfig, LayerConfig } from './DrawPolygonConfig';
+import { Observable } from 'rxjs/Observable';
 
 @Directive({
   selector: '[DrawPolygon]'
 })
-export class DrawPolygonDirective implements OnInit, AfterViewInit {
+export class DrawPolygonDirective implements OnInit {
 
+  @ViewChild('content') content: ElementRef;
   @Input('DrawPolygon') public config: DrawPolygonConfig = { markerSpread: 30, markerSpreadUnit: 'meters' };
   private _componentView: ViewContainerRef;
   private parent: any;
   private drawControl: any;
   private isCursorOverPoint: boolean;
   private isDragging: boolean;
+  private map: Map
+  private layerConfig: LayerConfig;
 
-  constructor(private _view: ViewContainerRef) {
-    this._componentView = _view;
-  }
+  constructor(private mapService: MapService) { }
 
   ngOnInit() {
-    this.parent = (<any>this._view)._data.componentView.component;
     this.drawControl = new MapboxDraw({
       displayControlsDefault: false,
       controls: {
@@ -31,30 +33,49 @@ export class DrawPolygonDirective implements OnInit, AfterViewInit {
         trash: true
       }
     });
-    setTimeout(() => {
+
+    this.layerConfig = new LayerConfig('points');
+    this.layerConfig.type = 'symbol';
+    this.layerConfig.id = 'points';
+    this.layerConfig.layout = {
+      "icon-image": "custom-marker",
+      "text-field": "",
+      "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+      "text-offset": [0, 0.6],
+      "text-anchor": "top"
+    };
+    this.mapService.mapLoaded$.subscribe(() => {
+      this.map = this.mapService.mapInstance;
       this.setupDrawControls();
-    }, 0);
+    });
   }
 
   setupDrawControls() {
-    let mapInstance = this.parent.mapInstance;
-    mapInstance.addControl(this.drawControl);
-    mapInstance.on('draw.create', this.generatePointGrid.bind(this));
-    mapInstance.on('draw.delete', this.removePointGrid.bind(this));
-    mapInstance.on('draw.update', this.updatePointGrid.bind(this));
+    this.map.addControl(this.drawControl);
+    this.map.on('draw.create', this.generatePointGrid.bind(this));
+    this.map.on('draw.delete', this.removePointGrid.bind(this));
+    this.map.on('draw.update', this.updatePointGrid.bind(this));
   }
 
   removePointGrid() {
-    let map = this.parent.mapInstance;
-    map.removeLayer('points');
-    map.removeSource('points');
+    this.map.removeLayer('points');
+    this.map.removeSource('points');
+    this.map.removeLayer('route');
+    this.map.removeSource('route');
   }
 
   updatePointGrid() {
-    let points = this.getPointGrid();
-    let map = this.parent.mapInstance;
-    map.getSource('points')
-      .setData(points);
+    let points = this.getPointGrid() as any;
+    let source = this.map.getSource(this.layerConfig.id) as any;
+    this.filterPointsInWater(points, this.getBoundingBox())
+      .then((filteredPoints) => {
+        source.setData(filteredPoints);
+        this.generateDashedLine(filteredPoints);
+      })
+      .catch((e) => {
+        source.setData(points);
+        this.generateDashedLine(points);
+      });
   }
 
   getDrawControlData() {
@@ -67,11 +88,14 @@ export class DrawPolygonDirective implements OnInit, AfterViewInit {
     }
   }
 
+  getBoundingBox() {
+    return turf.bbox(this.getDrawControlData().features[0].geometry);
+  }
+
   getPointGrid() {
     let data = this.getDrawControlData().features[0].geometry;
     return turf.pointGrid(
-      turf.bbox(
-        data),
+      this.getBoundingBox(),
       this.config.markerSpread,
       {
         units: this.config.markerSpreadUnit,
@@ -79,38 +103,75 @@ export class DrawPolygonDirective implements OnInit, AfterViewInit {
       });
   }
 
-  generatePointGrid(e) {
-    let points = this.getPointGrid();
-    let map = this.parent.mapInstance;
-    let layerConfig = this.getLayerConfig();
-    // map.addSource('points',
-    //   {
-    //     "type": "geojson",
-    //     "data": points
-    //   })
-    // map.addLayer(layerConfig);
-    let features = map.queryRenderedFeatures(points)
-      .filter((value) => value.layer['source-layer'] == 'water');
-    console.log(features[0]._vectorTileFeature.toGeoJSON());
-    console.log(points);
-    // map.getSource('points')
-    //   .setData({ type: "featureCollection", features: features });
+  generateDashedLine(points) {
+    let coordinates = points.features.map((feature) => {
+      return feature.geometry.coordinates;
+    });
+    let lineSource = this.map.getSource('route') as any;
+    if (lineSource) {
+      lineSource.setData({
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": coordinates
+        }
+      });
+    } else {
+      this.map.addLayer({
+        "id": "route",
+        "type": "line",
+        "source": {
+          "type": "geojson",
+          "data": {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "type": "LineString",
+              "coordinates": coordinates
+            }
+          }
+        },
+        "paint": {
+          "line-color": "gray",
+          "line-width": 2,
+          "line-dasharray": [2, 1]
+        }
+      } as any);
+    }
+
   }
 
-  getLayerConfig(): LayerConfig {
-    let config = new LayerConfig('points');
-    config.type = 'symbol';
-    config.id = 'points';
-    config.layout = {
-      "icon-image": "custom-marker",
-      "text-field": "Navigation point",
-      "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-      "text-offset": [0, 0.6],
-      "text-anchor": "top"
-    };
-    return config;
+  generatePointGrid(e) {
+    let points = this.getPointGrid() as any;
+    this.map.addSource('points',
+      {
+        "type": "geojson",
+        "data": points
+      })
+    this.map.addLayer(this.layerConfig);
+    let source = this.map.getSource(this.layerConfig.id) as any;
+    this.filterPointsInWater(points, this.getBoundingBox())
+      .then((filteredPoints) => {
+        source.setData(filteredPoints);
+        this.generateDashedLine(filteredPoints);
+      })
+      .catch((e) => {
+        this.generateDashedLine(points);
+      });
   }
-  ngAfterViewInit() {
+
+  filterPointsInWater(originalPoints: FeatureCollection<Point>, boundingBox: BBox) {
+    return new Promise((resolve, reject) => {
+      let features = this.map.queryRenderedFeatures(this.getBoundingBox(), { layers: ['water'] }) as any;
+      try {
+        let waterPolygon = turf.polygon(features[0].geometry.coordinates);
+        resolve(turf.pointsWithinPolygon(originalPoints, waterPolygon));
+      }
+      catch (e) {
+        reject(e);
+      }
+    });
 
   }
 }
