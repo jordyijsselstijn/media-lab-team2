@@ -1,0 +1,26 @@
+<div class="container">
+  <div class="sidebar">
+    <h1>Thursday</h1>
+    <h2>23 September</h2>
+    <hr>
+    <div class="filter">
+      <button id="drones" mat-raised-button color="primary">Drones (8)  <i class="fas fa-eye"></i></button>
+      <button id="areas" mat-raised-button color="primary">Areas (2)  <i class="fas fa-eye"></i></button>
+      <button id="direction" mat-raised-button color="primary">Directions  <i class="fas fa-eye"></i></button>
+      <button id="distance" mat-raised-button color="primary">Distance  <i class="fas fa-eye"></i></button>
+    </div>
+  </div>
+  <div class="mapInput">
+    <mat-form-field class="inputDistance">
+      <input matInput placeholder="Distance between points" required>
+    </mat-form-field>
+    <mat-form-field class="inputQuay">
+      <input matInput placeholder="Quay distance" required>
+    </mat-form-field>
+    <div class="mapButtons">
+      <button mat-raised-button color="primary" id="mapCancel">Cancel</button>
+      <button mat-raised-button color="primary" id="mapSave">Save</button>
+    </div>
+  </div>
+  <map name="" class="map"></map>
+</div>

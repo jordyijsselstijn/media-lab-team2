@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css?family=Ubuntu:400,700');
+
+
+
+.container {
+  margin: 0 7%;
+  padding-top: 25px;
+}
+
+.sidebar {
+  width: 20%;
+  float: left;
+  h1{
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 700;
+  }
+  h2{
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 400;
+  }
+  hr{
+    margin-right: 50px;
+  }
+  .filter{
+    .fa-eye{
+      margin-left: 5px;
+    }
+    #drones{
+      background-color: #FDC44D;
+    }
+    #areas{
+      background-color: #FE7A5A;
+    }
+    #direction{
+      background-color: #50C7BE;
+    }
+    #distance{
+      background-color: #1D9CE5;
+    }
+    button{
+      width: 200px;
+      margin: 5px 0;
+      border-radius: 50px;
+      box-shadow: none;
+    }
+  }
+}
+.inputDistance {
+  width: 250px;
+}
+
+.inputQuay{
+  margin-left: 50px;
+  width: 150px;
+
+}
+.mapInput{
+  display : flow-root;
+  .mapButtons {
+    #mapCancel{
+      color: #1D9CE5;
+      background-color: transparent;
+      border-style: solid;
+      border-width: thin;
+      border-color: #1D9CE5;
+      box-shadow: none;
+
+    }
+    #mapSave{
+      margin-left: 25px;
+      background-color: #1D9CE5;
+      box-shadow: none;
+    }
+    padding-top: 10px;
+    display: -webkit-inline-box;
+    width: auto;
+    float: right;
+  }
+}
+
+.map {
+  display: flex;
+}
+
