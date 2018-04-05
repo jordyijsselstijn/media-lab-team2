@@ -1,11 +1,12 @@
-import { Component, ViewChild, Inject, ElementRef } from '@angular/core';
+import { Component, ViewChild, Inject, ElementRef, ViewEncapsulation } from '@angular/core';
 import { MapService, MapEvent } from 'ngx-mapbox-gl';
 import { SymbolLayout } from 'mapbox-gl';
 
 @Component({
   selector: 'map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.scss']
+  styleUrls: ['./map.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class MapComponent {
 
