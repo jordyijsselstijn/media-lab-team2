@@ -3,3 +3,11 @@
   <mgl-control>
   </mgl-control>
 </mgl-map>
+<div class="button-group" [hidden]="drawInitialized">
+  <button class="draw-area" color="warn" (click)="draw()" mat-fab>
+    <i class="fas fa-crosshairs"></i>
+  </button>
+  <button class="delete-area" color="warn" (click)="trash()" mat-fab>
+    <i class="fas fa-trash-alt"></i>
+  </button>
+</div>

@@ -1,6 +1,7 @@
-import { Component, ViewChild, Inject, ElementRef, ViewEncapsulation } from '@angular/core';
+import { Component, ViewChild, Inject, ElementRef, OnInit, ViewEncapsulation } from '@angular/core';
 import { MapService, MapEvent } from 'ngx-mapbox-gl';
 import { SymbolLayout } from 'mapbox-gl';
+import { DrawPolygonDirective } from './draw-polygon/draw-polygon.directive';
 
 @Component({
   selector: 'map',
@@ -8,16 +9,29 @@ import { SymbolLayout } from 'mapbox-gl';
   styleUrls: ['./map.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class MapComponent {
+export class MapComponent implements OnInit {
 
   map: any;
   labelLayerId: string;
+  public drawInitialized = false;
+  @ViewChild(DrawPolygonDirective) drawDirective;
 
   constructor() {
   }
 
+  ngOnInit() {
+    this.drawInitialized = this.drawDirective.initialized;
+  }
   onMapClicked(event) {
 
+  }
+
+  draw() {
+    this.drawDirective.draw();
+  }
+
+  trash() {
+    this.drawDirective.trash();
   }
 
   onLoad(mapInstance) {

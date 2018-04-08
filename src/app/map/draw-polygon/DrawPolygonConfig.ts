@@ -8,7 +8,8 @@ export interface DrawPolygonConfig {
 export class LayerConfig {
     public id: string;
     public type: Layer['type']
-    public layout: MarkerLayoutConfig;
+    public layout?: MarkerLayoutConfig;
+    public paint: any;
     public source: string;
 
     constructor(sourceId) {

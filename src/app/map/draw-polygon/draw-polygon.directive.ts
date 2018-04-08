@@ -14,7 +14,7 @@ import { Observable } from 'rxjs/Observable';
 export class DrawPolygonDirective implements OnInit {
 
   @ViewChild('content') content: ElementRef;
-  @Input('DrawPolygon') public config: DrawPolygonConfig = { markerSpread: 30, markerSpreadUnit: 'meters' };
+  @Input('DrawPolygon') public config: DrawPolygonConfig = { markerSpread: 0, markerSpreadUnit: 'meters' };
   private _componentView: ViewContainerRef;
   private parent: any;
   private drawControl: any;
@@ -22,6 +22,7 @@ export class DrawPolygonDirective implements OnInit {
   private isDragging: boolean;
   private map: Map
   private layerConfig: LayerConfig;
+  public initialized: boolean;
 
   constructor(private mapService: MapService) { }
 
@@ -29,25 +30,36 @@ export class DrawPolygonDirective implements OnInit {
     this.drawControl = new MapboxDraw({
       displayControlsDefault: false,
       controls: {
-        polygon: true,
-        trash: true
+        polygon: false,
+        trash: false
       }
     });
-
     this.layerConfig = new LayerConfig('points');
-    this.layerConfig.type = 'symbol';
+    this.layerConfig.type = 'circle';
     this.layerConfig.id = 'points';
-    this.layerConfig.layout = {
-      "icon-image": "custom-marker",
-      "text-field": "",
-      "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-      "text-offset": [0, 0.6],
-      "text-anchor": "top"
+    this.layerConfig.paint = {
+      // make circles larger as the user zooms from z12 to z22
+      'circle-radius': {
+        'base': 1.75,
+        'stops': [[12, 2], [22, 180]]
+      },
+      // color circles by ethnicity, using a match expression
+      // https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-match
+      'circle-color': '#ccc'
     };
     this.mapService.mapLoaded$.subscribe(() => {
       this.map = this.mapService.mapInstance;
       this.setupDrawControls();
+      this.initialized = true;
     });
+  }
+
+  draw() {
+    this.drawControl.changeMode("draw_polygon")
+  }
+
+  trash() {
+    this.drawControl.trash();
   }
 
   setupDrawControls() {

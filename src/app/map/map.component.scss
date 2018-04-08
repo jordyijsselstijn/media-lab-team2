@@ -4,3 +4,36 @@ mgl-map
     height: 600px;
     width: 100%;
 }
+
+.button-group
+{
+    display: flex;
+    flex-direction: column;
+
+    & > *
+    {
+        margin-bottom: 8px;
+    }
+
+    .draw-area
+    {
+        right: 100px;
+        top: 25px;
+    
+        .fas.fa-crosshairs
+        {
+            font-size: 24px;
+        }
+    }
+    
+    .delete-area
+    {
+        right: 100px;
+        top: 25px;
+        
+        .fas.fa-crosshairs
+        {
+            font-size: 24px;
+        }
+    }
+}

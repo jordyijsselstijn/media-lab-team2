@@ -5,6 +5,7 @@ import { MAPBOX_API_KEY } from 'ngx-mapbox-gl';
 import { DrawPolygonDirective } from './draw-polygon/draw-polygon.directive';
 import { MapComponent } from './map.component';
 import { environment } from '../../environments/environment';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
     declarations: [
@@ -12,6 +13,7 @@ import { environment } from '../../environments/environment';
         DrawPolygonDirective
     ],
     imports: [
+        MatButtonModule,
         NgxMapboxGLModule.forRoot({
             accessToken: environment.mapbox_access_token
         }),
